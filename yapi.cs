@@ -22,20 +22,131 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace yapi
 {
+    public enum PromiseState
+    {
+        Pending,
+        Succeeded,
+        Failed
+    }
+
+    public delegate void PromiseCallback<T>(T arg);
+
     public interface Promise<T>
     {
-        public delegate void PromiseCallback(Promise<T> promise);
+        Promise<T> OnSuccess(PromiseCallback<T> callback);
+        Promise<T> OnSuccess(params PromiseCallback<T>[] callbacks);
+        Promise<T> OnFailure(PromiseCallback<T> callback);
+        Promise<T> OnFailure(params PromiseCallback<T>[] callbacks);
+        Promise<T> OnComplete(PromiseCallback<T> callback);
+        Promise<T> OnComplete(params PromiseCallback<T>[] callbacks);
+        PromiseState GetState();
+    }
 
-        public enum PromiseState
+    public class Deferred<T> : Promise<T>
+    {
+        private event PromiseCallback<T> success;
+        private event PromiseCallback<T> failure;
+        private PromiseState state = PromiseState.Pending;
+
+        public Deferred<T> OnSuccess(PromiseCallback<T> callback)
         {
-            Pending,
-            Resolved,
-            Rejected
+            success += callback;
+            return this;
         }
 
-        Promise<T> OnSuccess(params PromiseCallback[] callbacks);
-        Promise<T> OnFailure(params PromiseCallback[] callbacks);
-        Promise<T> OnComplete(params PromiseCallback[] callbacks);
-        PromiseState GetState();
+        public Deferred<T> OnSuccess(params PromiseCallback<T>[] callbacks)
+        {
+            foreach (var c in callbacks)
+                success += c;
+            return this;
+        }
+
+        Promise<T> Promise<T>.OnSuccess(PromiseCallback<T> callback)
+        {
+            return OnSuccess(callback);
+        }
+
+        Promise<T> Promise<T>.OnSuccess(params PromiseCallback<T>[] callbacks)
+        {
+            return OnSuccess(callbacks);
+        }
+
+        public Deferred<T> OnFailure(PromiseCallback<T> callback)
+        {
+            failure += callback;
+            return this;
+        }
+
+        public Deferred<T> OnFailure(params PromiseCallback<T>[] callbacks)
+        {
+            foreach (var c in callbacks)
+                failure += c;
+            return this;
+        }
+
+        Promise<T> Promise<T>.OnFailure(PromiseCallback<T> callback)
+        {
+            return OnFailure(callback);
+        }
+
+        Promise<T> Promise<T>.OnFailure(params PromiseCallback<T>[] callbacks)
+        {
+            return OnFailure(callbacks);
+        }
+
+        public Deferred<T> OnComplete(PromiseCallback<T> callback)
+        {
+            success += callback;
+            failure += callback;
+            return this;
+        }
+
+        public Deferred<T> OnComplete(params PromiseCallback<T>[] callbacks)
+        {
+            foreach (var c in callbacks)
+            {
+                success += c;
+                failure += c;
+            }
+            return this;
+        }
+
+        Promise<T> Promise<T>.OnComplete(PromiseCallback<T> callback)
+        {
+            return OnComplete(callback);
+        }
+
+        Promise<T> Promise<T>.OnComplete(params PromiseCallback<T>[] callbacks)
+        {
+            return OnComplete(callbacks);
+        }
+
+        public PromiseState GetState()
+        {
+            return state;
+        }
+
+        public void Succeed(T arg)
+        {
+            if (PromiseState.Pending != state)
+                return;
+            state = PromiseState.Succeeded;
+            if (null != success)
+                success(arg);
+        }
+
+        public void Fail(T arg)
+        {
+            if (PromiseState.Pending != state)
+                return;
+            state = PromiseState.Failed;
+            if (null != success)
+                failure(arg);
+        }
+
+        public Promise<T> Promise()
+        {
+            return this;
+        }
     }
 }
