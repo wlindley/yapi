@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 YAPI - Yet Another Promise Implementation
 Copyright (c) 2014 Walker Wondra-Lindley
 
@@ -22,26 +22,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace yapi
 {
-    public enum PromiseState
-    {
-        Pending,
-        Succeeded,
-        Failed
-    }
-
-    public delegate void PromiseCallback<T>(T arg);
-
-    public interface Promise<T>
-    {
-        Promise<T> OnSuccess(PromiseCallback<T> callback);
-        Promise<T> OnSuccess(params PromiseCallback<T>[] callbacks);
-        Promise<T> OnFailure(PromiseCallback<T> callback);
-        Promise<T> OnFailure(params PromiseCallback<T>[] callbacks);
-        Promise<T> OnComplete(PromiseCallback<T> callback);
-        Promise<T> OnComplete(params PromiseCallback<T>[] callbacks);
-        PromiseState GetState();
-    }
-
     public class Deferred<T> : Promise<T>
     {
         private event PromiseCallback<T> success;
@@ -140,7 +120,7 @@ namespace yapi
             if (PromiseState.Pending != state)
                 return;
             state = PromiseState.Failed;
-            if (null != success)
+            if (null != failure)
                 failure(arg);
         }
 
