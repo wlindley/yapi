@@ -26,7 +26,7 @@ namespace YapiTest
             var expectedArg = "expected argument";
             var wasCalled = false;
 
-            testObj.OnSuccess((string arg) =>
+            testObj.Promise().OnSuccess((string arg) =>
             {
                 if (arg == expectedArg)
                     wasCalled = true;
@@ -35,6 +35,29 @@ namespace YapiTest
             testObj.Succeed(expectedArg);
 
             Assert.True(wasCalled);
+        }
+
+        [Test]
+        public void SucceedCallsAllOnSuccessMethodsWithParamWhenMultipleMethodsArePassed()
+        {
+            var expectedArg = "expected argument";
+            var wasCalled1 = false;
+            var wasCalled2 = false;
+
+            testObj.Promise().OnSuccess((string arg) =>
+            {
+                if (arg == expectedArg)
+                    wasCalled1 = true;
+            }, (string arg) =>
+            {
+                if (arg == expectedArg)
+                    wasCalled2 = true;
+            });
+
+            testObj.Succeed(expectedArg);
+
+            Assert.True(wasCalled1);
+            Assert.True(wasCalled2);
         }
 
         [Test]
@@ -43,7 +66,7 @@ namespace YapiTest
             var expectedArg = "expected argument";
             var wasCalled = false;
 
-            testObj.OnComplete((string arg) =>
+            testObj.Promise().OnComplete((string arg) =>
             {
                 if (arg == expectedArg)
                     wasCalled = true;
@@ -55,12 +78,35 @@ namespace YapiTest
         }
 
         [Test]
+        public void SucceedCallsAllOnCompleteMethodsWithParamWhenMultipleMethodsArePassed()
+        {
+            var expectedArg = "expected argument";
+            var wasCalled1 = false;
+            var wasCalled2 = false;
+
+            testObj.Promise().OnComplete((string arg) =>
+            {
+                if (arg == expectedArg)
+                    wasCalled1 = true;
+            }, (string arg) =>
+            {
+                if (arg == expectedArg)
+                    wasCalled2 = true;
+            });
+
+            testObj.Succeed(expectedArg);
+
+            Assert.True(wasCalled1);
+            Assert.True(wasCalled2);
+        }
+
+        [Test]
         public void FailCallsAllOnFailureMethodsWithParam()
         {
             var expectedArg = "expected argument";
             var wasCalled = false;
 
-            testObj.OnFailure((string arg) =>
+            testObj.Promise().OnFailure((string arg) =>
             {
                 if (arg == expectedArg)
                     wasCalled = true;
@@ -72,12 +118,35 @@ namespace YapiTest
         }
 
         [Test]
+        public void FailCallsAllOnFailureMethodsWithParamWhenMultipleMethodsArePassed()
+        {
+            var expectedArg = "expected argument";
+            var wasCalled1 = false;
+            var wasCalled2 = false;
+
+            testObj.Promise().OnFailure((string arg) =>
+            {
+                if (arg == expectedArg)
+                    wasCalled1 = true;
+            }, (string arg) =>
+            {
+                if (arg == expectedArg)
+                    wasCalled2 = true;
+            });
+
+            testObj.Fail(expectedArg);
+
+            Assert.True(wasCalled1);
+            Assert.True(wasCalled2);
+        }
+
+        [Test]
         public void FailCallsAllOnCompleteMethodsWithParam()
         {
             var expectedArg = "expected argument";
             var wasCalled = false;
 
-            testObj.OnComplete((string arg) =>
+            testObj.Promise().OnComplete((string arg) =>
             {
                 if (arg == expectedArg)
                     wasCalled = true;
